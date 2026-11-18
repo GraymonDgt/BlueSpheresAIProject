@@ -323,7 +323,7 @@ def moveForward():
             player_position[0] %= 32
 
 def decideAction():
-    decision = input(f"SPHERES:{countSpheresRemaining()} RINGS:{rings_left} INPUT:")
+    decision = input(f"\033[0mSPHERES:{countSpheresRemaining()} RINGS:{rings_left} INPUT:")
 
     if "l" in decision:
         return action.TURNLEFT
@@ -336,7 +336,8 @@ def decideAction():
     # game_array is a 2d list of spheres enums with the format [Y,X] (because i coded it wrong)
     # player_facing is an enum
     # time_taken is for scoring the AI
-    # rings_left for pefects
+    # rings_left for perfects
+    # player_position is [X,Y]
 
 def mainLoop(wait_time, use_visuals, perfect_rings):
     #most inputs to this function are unused
