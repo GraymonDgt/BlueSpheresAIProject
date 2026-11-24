@@ -1,6 +1,10 @@
 # This is a sample Python script.
 import copy
+import random
+import time
 from enum import IntEnum
+from levelchunks import levelchunks
+from levelchunks import ring_amounts
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
@@ -24,9 +28,9 @@ class facing(IntEnum):
     LEFT = 3
 
 
-player_position = [2, 30]
+player_position = [15, 17]
 
-def setupArray():
+def setupArray(randomize_level):
     game_array_l = [
         [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
         [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
@@ -50,7 +54,6 @@ def setupArray():
         [3, 3, 0, 0, 4, 4, 2, 4, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 4, 2, 4, 4, 0, 0, 3, 3],
         [3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
         [3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
-        [3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
         [3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
         [3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3],
         [3, 3, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 3, 3],
@@ -63,9 +66,53 @@ def setupArray():
         [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
 
     ]
-    # TODO add more maps/better way of making maps (me)
+    #define a bunch of 16x16 chunks
+
+    #randomly pick 4
     global rings_left
     rings_left = 64
+    #combine into game_array
+
+    #ENSURE ITS NOT IMPOSSIBLE?
+    global player_position
+    if randomize_level:
+        rings_left = 0
+        r1 = random.randint(0,len(levelchunks)-1)
+        rings_left += ring_amounts[r1]
+        for i in range(0,16):
+            for j in range(0,16):
+                game_array_l[i][j] = levelchunks[r1][i][j]
+                if levelchunks[r1][i][j] == 9:
+                    player_position = [j,i]
+                    game_array_l[i][j] = 0
+
+        r1 = random.randint(0,len(levelchunks)-1)
+        rings_left += ring_amounts[r1]
+        for i in reversed(range(0,16)):
+            for j in range(0,16):
+                game_array_l[31-i][j] = levelchunks[r1][i][j]
+                if levelchunks[r1][i][j] == 9:
+                    game_array_l[31-i][j] = 0
+
+
+        r1 = random.randint(0,len(levelchunks)-1)
+        rings_left += ring_amounts[r1]
+        for i in range(0,16):
+            for j in reversed(range(0,16)):
+                game_array_l[i][31-j] = levelchunks[r1][i][j]
+                if levelchunks[r1][i][j] == 9:
+                    game_array_l[i][31-j] = 0
+        r1 = random.randint(0,len(levelchunks)-1)
+        rings_left += ring_amounts[r1]
+        for i in reversed(range(0,16)):
+            for j in reversed(range(0,16)):
+                game_array_l[31-i][31-j] = levelchunks[r1][i][j]
+                if levelchunks[r1][i][j] == 9:
+                    game_array_l[31-i][31-j] = 0
+
+
+    # TODO ring calculation
+
     # Use a breakpoint in the code line below to debug your script.
     # make a 32x32 array, fill it with points
     # precalculate amount of rings needed for a perfect or just set it
@@ -138,11 +185,11 @@ def spheresToRings(list):
     if abs(botleft[1] - topleft[1]) < 16:
         pass
     else:
-        inverty = True#TODO fail ring check if blue spheres arent in any of the corners
+        inverty = True
 
     if invertx:
         pass
-    else:
+    else:#TODO use invertx/inverty to change location of sphere check
         if game_array[topleft[1]+1][topleft[0]+1] != spheres.BLUE:
             return
         if game_array[topright[1]+1][topright[0]-1] != spheres.BLUE:
@@ -168,6 +215,8 @@ def spheresToRings(list):
 
 
 def floodFillRings(start):
+    start[0]%=32
+    start[1] %= 32
     newstart = start
     game_array[start[1]][start[0]] = spheres.RING
     if game_array[start[1]][start[0]+1] == spheres.BLUE:
@@ -194,6 +243,8 @@ def floodFillRings(start):
 
 
 def convertLoopsToRings(starting_space):
+    starting_space[0] %= 32
+    starting_space[1] %= 32
     points_in_loop.append(starting_space)
     start_copy = copy.deepcopy(starting_space)
     start_copy[1]-=1
@@ -214,6 +265,8 @@ def convertLoopsToRings(starting_space):
 
 
 def recursiveRingCheck(starting_space,current_space,last_action,last_direction):
+    starting_space[0] %= 32
+    starting_space[1] %= 32
     if current_space == starting_space:
         spheresToRings(points_in_loop)
     if game_array[current_space[1]][current_space[0]] != spheres.RED:
@@ -333,7 +386,7 @@ def decideAction():
         return action.JUMP
     return action.NOTHING
     #TODO add AI that makes the descision
-    # game_array is a 2d list of spheres enums with the format [Y,X] (because i coded it wrong)
+    # game_array is a 2d list of spheres enums with the format [Y][X] (because i coded it wrong)
     # player_facing is an enum
     # time_taken is for scoring the AI
     # rings_left for perfects
@@ -431,6 +484,7 @@ def mainLoop(wait_time, use_visuals, perfect_rings):
 
         # process visuals if needed
         # vsync/wait
+        time.sleep(wait_time)
     if rings_left == 0:
         perfect = True
     return time_taken,perfect,completed
@@ -448,7 +502,7 @@ if __name__ == '__main__':
     BLUE = "\033[1;34m"
 
     YELLOW = "\033[33m"
-    game_array = setupArray()
+    game_array = setupArray(True)
     mainLoop(0,True,12)
 
     #TODO cleanup or print more info here
